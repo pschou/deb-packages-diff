@@ -172,6 +172,8 @@ func loadIndex(indexPath string) (pkg_index []pkg_info) {
 			value := strings.TrimSpace(parts[1])
 
 			switch field {
+			case "MD5sum":
+				pkgInfo.hash = "{md5}" + value
 			case "SHA1":
 				pkgInfo.hash = "{sha1}" + value
 			case "SHA256":
