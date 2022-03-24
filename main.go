@@ -33,7 +33,7 @@ func main() {
 
 	var newFile = flag.String("new", "NEW_Packages.gz", "The newer Packages.gz file or repodir/ dir for comparison")
 	var oldFile = flag.String("old", "OLD_Packages.gz", "The older Packages.gz file or repodir/ dir for comparison")
-	var inRepoPath = flag.String("repo", "dists/Debian11.2/main/binary-amd64", "Repo path to use in file list")
+	var inRepoPath = flag.String("repo", "", "Repo path to use in file list")
 	var outputFile = flag.String("output", "-", "Output file for comparison result")
 	var showNew = flag.Bool("showAdded", false, "Display packages only in the new list")
 	var showOld = flag.Bool("showRemoved", false, "Display packages only in the old list")
