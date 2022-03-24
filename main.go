@@ -87,7 +87,7 @@ matchups:
 		}
 	}
 
-	fmt.Fprintln(out, "# Alpine-diff matchup, version:", version)
+	fmt.Fprintln(out, "# Debian-diff matchup, version:", version)
 	fmt.Fprintln(out, "# new:", *newFile, "old:", *oldFile)
 	fmt.Fprintln(out, "# repodir:", *inRepoPath)
 
