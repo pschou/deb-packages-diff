@@ -91,7 +91,7 @@ matchups:
 	fmt.Fprintln(out, "# new:", *newFile, "old:", *oldFile)
 	fmt.Fprintln(out, "# repodir:", *inRepoPath)
 
-	startPath := getBottomDir(strings.TrimPrefix(*inRepoPath, "/"), 2)
+	startPath := "" // getBottomDir(strings.TrimPrefix(*inRepoPath, "/"), 2)
 
 	if *showNew {
 		for iNew, v := range new_pkg_index {
