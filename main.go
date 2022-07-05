@@ -6,7 +6,6 @@ import (
 	"compress/gzip"
 	"flag"
 	"fmt"
-	humanize "github.com/dustin/go-humanize"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,6 +13,9 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
+
+	humanize "github.com/dustin/go-humanize"
 )
 
 var version = "test"
@@ -25,6 +27,8 @@ type pkg_info struct {
 	size    int
 	version string
 }
+
+var after *time.Time
 
 func main() {
 	flag.Usage = func() {
@@ -204,6 +208,8 @@ func loadIndex(indexPath string) (pkg_index []pkg_info) {
 				pkgInfo.hash = "{sha1}" + value
 			case "SHA256":
 				pkgInfo.hash = "{sha256}" + value
+			case "SHA512":
+				pkgInfo.hash = "{sha512}" + value
 			case "Filename":
 				pkgInfo.name = strings.TrimPrefix(value, "/")
 			case "Size":
