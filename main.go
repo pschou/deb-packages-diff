@@ -172,9 +172,7 @@ func loadIndex(indexPath string) (pkg_index []pkg_info) {
 
 	indexData := bufio.NewScanner(gzr)
 
-	for indexData.Scan() {
-		line := indexData.Text()
-
+	for {
 		// This is what the sections of a Packages.gz may look like (format wise)
 
 		// Package: aiccu
@@ -203,7 +201,7 @@ func loadIndex(indexPath string) (pkg_index []pkg_info) {
 		// Read in blob for a package
 		var pkgInfo pkg_info
 		for indexData.Scan() {
-			line = strings.TrimSpace(indexData.Text())
+			line := strings.TrimSpace(indexData.Text())
 			if strings.TrimSpace(line) == "" {
 				break
 			}
@@ -238,6 +236,8 @@ func loadIndex(indexPath string) (pkg_index []pkg_info) {
 
 		if len(pkgInfo.name) > 0 {
 			pkg_index = append(pkg_index, pkgInfo)
+		} else {
+			break
 		}
 	}
 
