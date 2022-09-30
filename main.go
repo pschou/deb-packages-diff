@@ -2,11 +2,9 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"compress/gzip"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -29,6 +27,7 @@ type pkg_info struct {
 }
 
 var after *time.Time
+var debug *bool
 
 func main() {
 	flag.Usage = func() {
@@ -43,17 +42,24 @@ func main() {
 	var showNew = flag.Bool("showAdded", false, "Display packages only in the new list")
 	var showOld = flag.Bool("showRemoved", false, "Display packages only in the old list")
 	var showCommon = flag.Bool("showCommon", false, "Display packages in both the new and old lists")
+	debug = flag.Bool("debug", false, "Turn on debug output for inspection")
 
 	flag.Parse()
 
 	var new_pkg_index = []pkg_info{}
 	var old_pkg_index = []pkg_info{}
 
+	if *debug {
+		log.Println("loading new")
+	}
 	if _, isdir := isDirectory(*newFile); *newFile != "" {
 		if isdir {
 			*newFile = path.Join(*newFile, indexFileName)
 		}
 		new_pkg_index = loadIndex(*newFile)
+	}
+	if *debug {
+		log.Println("loading old")
 	}
 	if _, isdir := isDirectory(*oldFile); *oldFile != "" {
 		if isdir {
@@ -62,6 +68,9 @@ func main() {
 		old_pkg_index = loadIndex(*oldFile)
 	}
 
+	if *debug {
+		log.Println("assigning output")
+	}
 	out := os.Stdout
 
 	if *outputFile != "-" {
@@ -158,19 +167,15 @@ func loadIndex(indexPath string) (pkg_index []pkg_info) {
 
 	defer fd.Close()
 
-	data, err := ioutil.ReadAll(fd)
-	check(err)
-
-	zbuf := bytes.NewBuffer(data)
-	gzr, err := gzip.NewReader(zbuf)
+	gzr, err := gzip.NewReader(fd)
 	check(err)
 
 	indexData := bufio.NewScanner(gzr)
 
 	for indexData.Scan() {
-		var pkgInfo pkg_info
-
 		line := indexData.Text()
+
+		// This is what the sections of a Packages.gz may look like (format wise)
 
 		// Package: aiccu
 		// Priority: optional
@@ -192,8 +197,17 @@ func loadIndex(indexPath string) (pkg_index []pkg_info) {
 		// Description-md5: 064dfb516e6eb18f4217214256491d71
 		// Bugs: https://bugs.launchpad.net/ubuntu/+filebug
 		// Origin: Ubuntu
+		// Npp-Applications: 92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a,
+		//                     ec8030f7-c20a-464f-9b0e-13a3a9e97384
 
-		for line != "" {
+		// Read in blob for a package
+		var pkgInfo pkg_info
+		for indexData.Scan() {
+			line = strings.TrimSpace(indexData.Text())
+			if strings.TrimSpace(line) == "" {
+				break
+			}
+
 			parts := strings.SplitN(line, ":", 2)
 			if len(parts) != 2 {
 				continue
@@ -217,14 +231,14 @@ func loadIndex(indexPath string) (pkg_index []pkg_info) {
 				check(err)
 			}
 
-			indexData.Scan()
-			line = strings.TrimSpace(indexData.Text())
+		}
+		if *debug {
+			log.Println("found package", pkgInfo.name)
 		}
 
-		if len(pkgInfo.name) > 5 {
+		if len(pkgInfo.name) > 0 {
 			pkg_index = append(pkg_index, pkgInfo)
 		}
-
 	}
 
 	return
